@@ -13,7 +13,7 @@ Inspired by the Simons / Renaissance approach: public data, multi-factor conflue
 ```
                     ┌────────────────────────────────┐
                     │ Claude Code Routine (cloud)    │
-                    │  • cron: 2:30PM GMT-TZ daily   │
+                    │  • cron: 06:00 GMT daily       │
                     │  • clones this repo            │
                     │  • reads SKILL.md + framework/ │
                     └──────────────┬─────────────────┘
