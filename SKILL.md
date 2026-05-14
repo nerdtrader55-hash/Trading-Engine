@@ -102,13 +102,7 @@ Compute:
 
 If R:R fails, downgrade to WAIT.
 
-## 7. Cap output
-
-- Max 3 BUY signals per run (configurable via `runtime.max_signals`)
-- If more than 3 qualify, rank by confluence score, then by ATR-normalized momentum, take top 3
-- The rest get listed in the "also watching" footer
-
-## 8. Post to Slack
+## 7. Post to Slack
 
 Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
 
@@ -119,7 +113,7 @@ Just post exactly same template-based message to Slack, with the BUY signals and
 Never change the template file. 
 
 
-## 9. Hard rules — never violate
+## 8. Hard rules — never violate
 
 These come from section 9 of the original spec:
 
@@ -133,6 +127,6 @@ These come from section 9 of the original spec:
 - Never commit anything to this repo during a run
 - Never post signals to Slack other than slackoutput template
 
-## 10. End the run
+## 9. End the run
 
 Post the Slack message. Done. Do not loop. Do not start another analysis pass. Exit cleanly.
