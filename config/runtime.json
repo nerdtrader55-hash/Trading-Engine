@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Runtime knobs. Edit freely; the routine reads these on every run.",
+
+  "timezone": "Europe/London",
+
+  "slack_channel_id": "C0B2CTBAV9B"
+}

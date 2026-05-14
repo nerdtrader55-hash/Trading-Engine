@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "12-ticker universe for the pre-market signal engine. Edit to add/remove. Each entry: ticker (exact symbol used by Alpha Vantage), name, sector. Sector is used for sector-rotation analysis in framework/10-statistical-patterns.md.",
+  "universe": [
+    { "ticker": "ARM",  "name": "Arm Holdings PLC ADR",       "sector": "Semiconductors" },
+    { "ticker": "NVDA", "name": "NVIDIA Corp.",               "sector": "Semiconductors" },
+    { "ticker": "META", "name": "Meta Platforms Inc.",        "sector": "Communication Services" },
+    { "ticker": "GOOG", "name": "Alphabet Inc. Class C",      "sector": "Communication Services" },
+    { "ticker": "AMZN", "name": "Amazon.com Inc.",            "sector": "Consumer Discretionary" },
+    { "ticker": "UBER", "name": "Uber Technologies Inc.",     "sector": "Industrials" },
+    { "ticker": "AAPL", "name": "Apple Inc.",                 "sector": "Technology" },
+    { "ticker": "CRWD", "name": "CrowdStrike Holdings Inc.",  "sector": "Cybersecurity" },
+    { "ticker": "GEV",  "name": "GE Vernova Inc.",            "sector": "Industrials / Energy" },
+    { "ticker": "V",    "name": "Visa Inc.",                  "sector": "Financials" },
+    { "ticker": "SPGI", "name": "S&P Global Inc.",            "sector": "Financials" },
+    { "ticker": "MCO",  "name": "Moody's Corp.",              "sector": "Financials" }
+  ]
+}
