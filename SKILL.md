@@ -90,7 +90,8 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 
 - 5–6 confirms → HIGH confidence BUY
 - 4 confirms → MEDIUM confidence BUY (smaller size note)
-- ≤3 confirms → WAIT (no signal output)
+- 3 confirms → WAIT, but add the ticker to the "Also Watching" list in the Slack footer
+- ≤2 confirms → WAIT, no mention in output
 
 ## 6. Risk gate (must pass to issue BUY)
 
@@ -105,6 +106,18 @@ If R:R fails, downgrade to WAIT.
 ## 7. Post to Slack
 
 Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+
+- Date and time (GMT) in the message header
+- Market snapshot: VIX level + trend, SPY/QQQ futures % change, DXY, 10Y yield
+- For each BUY signal: ticker, company name, confidence level (HIGH/MEDIUM), confluence score (X/6), which categories confirmed, entry zone (hourly support → pre-market price), stop (entry − 1.5 × ATR), target (entry + 3.0 × ATR), R:R ratio, primary reason in plain English, pattern note if one exists
+- "Also Watching" section: any ticker that scored exactly 3/6, naming which category it failed
+- "Excluded" footer: any ticker in earnings blackout with its next earnings date
+- Risk disclaimer at the bottom
+
+Pick the correct template from `templates/slack-output.md` based on the run outcome:
+- Template A — one or more BUY signals issued
+- Template B — a macro kill-switch fired before any ticker analysis
+- Template C — scan completed, no setup reached the confluence threshold
 
 DO not update anything into stock files or this repo during the run. This is an output-only engine.
 
