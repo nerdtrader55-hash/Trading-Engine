@@ -4,5 +4,39 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "skip_fomc_days": true,
+    "skip_cpi_days": true,
+    "skip_nfp_days": true
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "counter_trend_min_categories": 5,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_account_risk_pct": 2.0
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_extra_confluence": 1
+  },
+
+  "vix_regime": {
+    "below_15":  "complacency — tighten stops",
+    "15_to_20":  "normal — full ATR stops",
+    "20_to_25":  "caution — HIGH confidence only (5/6 required)",
+    "25_to_30":  "tighten position sizing, note in output",
+    "above_30":  "kill-switch — no signals issued"
+  }
 }
