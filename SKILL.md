@@ -104,7 +104,15 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags).
+
+Every message must include:
+- Date/time header with timezone
+- Macro snapshot (VIX, SPY/QQQ futures, DXY)
+- One signal block per BUY (max 3), with entry zone, stop, target, R:R, confirmed categories
+- "Also watching" list for tickers that scored but didn't qualify
+- Earnings exclusion footnote
+- Risk disclaimer
 
 DO not update anything into stock files or this repo during the run. This is an output-only engine.
 
