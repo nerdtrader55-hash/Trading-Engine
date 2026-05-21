@@ -17,6 +17,16 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.5. Signal window check
+
+Check the current UTC/GMT time.
+
+- Signals are only generated during the **02:30–08:30 GMT** window.
+- Target delivery: **by 06:00 GMT**.
+- If the current time is **before 02:30 GMT**: the routine fired too early — post a brief Slack note and stop.
+- If the current time is **after 08:30 GMT**: the pre-market window has closed — post Template B with reason "Signal window closed (after 08:30 GMT)" and stop. Do not issue signals.
+- US market opens at **14:30 GMT**. Any signal posted after 08:30 GMT is too late to act on pre-market.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
@@ -104,13 +114,19 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`.
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Choose the right template:
+- **Template A** — one or more BUY signals to report (max 3)
+- **Template B** — macro kill-switch fired (VIX, FOMC, CPI, NFP, or window-closed)
+- **Template C** — all tickers scored below 4/6, no kill-switch
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
-
-Never change the template file. 
+Rules:
+- Populate every `{PLACEHOLDER}` with real values. Never leave a placeholder in the live message.
+- Use Slack markdown only (bold with `*`, no HTML tags).
+- Post exactly **one** Slack message per run. No intermediate updates.
+- Do not modify `templates/slack-output.md` or any other repo file during the run.
+- Do not update anything in this repo during the run. This is an output-only engine.
 
 
 ## 8. Hard rules — never violate
