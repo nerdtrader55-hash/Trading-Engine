@@ -106,6 +106,12 @@ If R:R fails, downgrade to WAIT.
 
 Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
 
+- Macro snapshot header (VIX, SPY/QQQ direction, DXY note)
+- One signal block per BUY (ticker, confidence, entry zone, stop, target, R:R, confirmed categories, one-line thesis, up to 2 headlines)
+- "Also watching" list — tickers that scored exactly 3/6
+- "Excluded" footer — tickers in earnings blackout or with data failures, with next earnings date where known
+- Risk disclaimer line
+
 DO not update anything into stock files or this repo during the run. This is an output-only engine.
 
 Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
