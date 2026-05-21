@@ -13,7 +13,7 @@ Inspired by the Simons / Renaissance approach: public data, multi-factor conflue
 ```
                     ┌────────────────────────────────┐
                     │ Claude Code Routine (cloud)    │
-                    │  • cron: 2:30PM GMT-TZ daily   │
+                    │  • cron: 06:00 GMT daily       │
                     │  • clones this repo            │
                     │  • reads SKILL.md + framework/ │
                     └──────────────┬─────────────────┘
@@ -26,7 +26,7 @@ Inspired by the Simons / Renaissance approach: public data, multi-factor conflue
         └──────────────┘   └──────────────┘   └──────────────┘
 ```
 
-Every weekday at 02:30PM GMT time, the routine:
+Every weekday at 06:00 GMT, the routine:
 
 1. Loads the 12-ticker universe from `config/stocks.json`
 2. Skips any ticker within 3 trading days of earnings (checked live via Alpha Vantage `EARNINGS_CALENDAR`)

@@ -4,5 +4,24 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window_gmt": {
+    "start": "02:30",
+    "end": "08:30",
+    "description": "Only generate signals within this GMT window. Target delivery: 06:00 GMT."
+  },
+
+  "vix_max": 30,
+  "confluence_threshold": 4,
+  "max_positions": 3,
+  "min_rr": 2.0,
+
+  "stop_loss_atr_mult": 1.5,
+  "target_atr_mult": 3.0,
+
+  "earnings_blackout_days": 3,
+
+  "volume_confirm_threshold": 1.0,
+  "volume_strong_threshold": 1.5
 }

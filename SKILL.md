@@ -17,13 +17,15 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+**Signal window check:** Confirm the current GMT time is between `runtime.signal_window_gmt.start` (02:30) and `runtime.signal_window_gmt.end` (08:30). If outside this window, post Template B with reason "Outside signal generation window (02:30–08:30 GMT)" and stop.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.vix_max` (30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
