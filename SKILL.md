@@ -104,13 +104,26 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+**Template selection:**
+- Any BUY signals fired → **Template A**
+- Kill-switch fired in step 1 → **Template B**
+- No kill-switch but all tickers scored ≤3/6 → **Template C**
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+**Always include in Template A:**
+- Date and time in `runtime.timezone` (Europe/London)
+- Macro snapshot block: SPY futures direction/%, QQQ futures direction/%, VIX level + regime, DXY level + 5d change, 10Y yield + 5d change in bps
+- Per-signal block (max 3): ticker, confidence label (HIGH/MEDIUM), confluence score x/6, entry zone low/high from module 09, stop = entry − 1.5×ATR, target = entry + 3×ATR, R:R, per-category confluence tick/cross row, statistical-pattern edge note from module 10 (omit if no pattern detected)
+- "Also watching" — tickers that scored 3/6 (below threshold but worth noting)
+- "Excluded" — tickers in earnings blackout (include next earnings date) and any data-failure tickers
+- Risk disclaimer (verbatim from template)
 
-Never change the template file. 
+**Do not update anything into stock files or this repo during the run.** This is an output-only engine.
+
+Post exactly one Slack message per run using the template. Do not post any other messages during the run.
+
+Never change the template file.
 
 
 ## 8. Hard rules — never violate

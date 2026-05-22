@@ -4,5 +4,87 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window_gmt": {
+    "open": "02:30",
+    "close": "08:30",
+    "note": "Signals are only generated within this window. Outside it, post a note and stop."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "high_confidence_threshold": 5,
+    "max_signals_per_run": 3,
+    "counter_trend_min_categories": 5,
+    "post_earnings_min_categories": 5
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "atr_stop_multiplier": 1.5,
+    "atr_target_multiplier": 3.0,
+    "max_risk_pct_per_trade": 2.0,
+    "max_concurrent_positions": 3
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "vix_caution_threshold": 20,
+    "vix_high_confidence_only_threshold": 25,
+    "skip_fomc_days": true,
+    "skip_cpi_days": true,
+    "skip_nfp_days": true
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "earnings_calendar_horizon": "3month"
+  },
+
+  "volume": {
+    "strong_confirm_pct": 150,
+    "confirm_pct": 100,
+    "weak_threshold_pct": 70,
+    "breakout_min_volume_pct": 120
+  },
+
+  "bollinger": {
+    "period": 20,
+    "std_dev": 2,
+    "squeeze_threshold_pct": 70,
+    "expanding_threshold_pct": 130
+  },
+
+  "ema_periods": [20, 50, 200],
+
+  "rsi": {
+    "period": 14,
+    "buy_zone_low": 40,
+    "buy_zone_high": 65,
+    "overbought": 70,
+    "oversold": 30
+  },
+
+  "macd": {
+    "fast": 12,
+    "slow": 26,
+    "signal": 9,
+    "bullish_cross_lookback_sessions": 5
+  },
+
+  "fibonacci_levels": [0.382, 0.5, 0.618],
+
+  "news_sentiment": {
+    "strong_positive_threshold": 0.35,
+    "positive_threshold": 0.15,
+    "negative_threshold": -0.15,
+    "strong_negative_threshold": -0.35
+  },
+
+  "historical_pattern": {
+    "lookback_days": 260,
+    "min_prior_occurrences_for_analog": 3
+  }
 }
