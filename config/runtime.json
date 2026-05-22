@@ -4,5 +4,37 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window_gmt": {
+    "start": "02:30",
+    "end": "08:30",
+    "note": "Signals are only generated during this pre-market window (GMT). If the routine starts outside this window, post a warning and exit without analysis."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "min_categories_counter_trend": 5,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_account_risk_per_trade_pct": 2.0
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "vix_high_confidence_only_above": 20,
+    "note_vix_zone": "VIX 20-25 restricts signals to HIGH confidence only (5-6/6). VIX > vix_max triggers full kill-switch."
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_elevated_bar_days": 1,
+    "note": "After blackout ends, raise confluence bar to 5/6 for post_earnings_elevated_bar_days trading day(s) to avoid gap reversals."
+  }
 }
