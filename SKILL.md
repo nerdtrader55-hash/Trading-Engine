@@ -23,7 +23,7 @@ Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -88,23 +88,23 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 
 **Decision rule:**
 
-- 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
+- `confluence.high_confidence_threshold` (default 5)–6 confirms → HIGH confidence BUY
+- `confluence.min_categories_for_buy` (default 4) confirms → MEDIUM confidence BUY (smaller size note)
 - ≤3 confirms → WAIT (no signal output)
 
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`risk.atr_multiplier_stop` × ATR14) — default 1.5×
+- **Target:** entry + (`risk.atr_multiplier_target` × ATR14) — default 3.0×
+- **Risk:reward:** must be ≥ `risk.min_rr` (default 2.0)
 
 If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `slack_channel_id` from `config/runtime.json`. Format = `templates/slack-output.md` (Template A for signals, Template B for kill-switch, Template C for no signals). Use Slack mrkdwn (no HTML tags). Always include:
 
 DO not update anything into stock files or this repo during the run. This is an output-only engine.
 
