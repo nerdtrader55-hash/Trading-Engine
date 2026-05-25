@@ -23,7 +23,7 @@ Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> macro_kill_switches.vix_max` (default 30) from `config/runtime.json` | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -86,31 +86,41 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 | Macro | SPY & QQQ futures green AND VIX < 20 |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
-**Decision rule:**
+**Decision rule** (thresholds from `config/runtime.json → confluence`):
 
-- 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
+- `min_categories_high_confidence` (default 5) or 6 confirms → HIGH confidence BUY
+- `min_categories_for_buy` (default 4) confirms → MEDIUM confidence BUY (note smaller position size)
 - ≤3 confirms → WAIT (no signal output)
+
+Cap total output at `max_signals_per_run` (default 3) BUY signals. When more tickers qualify, rank by confluence score descending, then by pattern-tag count, then by historical-analog hit rate.
 
 ## 6. Risk gate (must pass to issue BUY)
 
-Compute:
+Compute using multipliers from `config/runtime.json → risk`:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`risk.atr_stop_multiplier` × ATR14)  [default 1.5]
+- **Target:** entry + (`risk.atr_target_multiplier` × ATR14)  [default 3.0]
+- **Risk:reward:** must be ≥ `risk.min_rr`  [default 2.0]
 
 If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `slack_channel_id` from `config/runtime.json`. Format = `templates/slack-output.md`. Use Slack-compatible markdown (`*bold*`, `_italic_`) — no HTML tags, no double-asterisk.
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Choose the correct template from `templates/slack-output.md`:
+- **Template A** — at least one BUY signal was generated
+- **Template B** — a macro kill-switch fired (stop immediately after posting; do not analyse tickers)
+- **Template C** — all tickers analysed but none reached the confluence threshold
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+Always include in the message:
+- Macro snapshot header (SPY, QQQ direction; VIX level + trend; DXY level)
+- All BUY signal blocks with: ticker, confidence, score, entry zone, stop, target, R:R, confirming categories, pattern tag, one-line rationale
+- "Also watching" section for tickers at confluence_threshold − 1 (up to 3)
+- Footer: earnings blackout list with next earnings date, and any tickers skipped due to API errors
+- Risk disclaimer line
 
-Never change the template file. 
+Post exactly one message per run. Do not post status updates, intermediate findings, or multiple messages. Do not update any file in this repo during the run.
 
 
 ## 8. Hard rules — never violate
