@@ -4,5 +4,59 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "signal_window_gmt": {
+    "start": "02:30",
+    "end": "08:30",
+    "description": "Signals are only generated inside this window. Outside it, the routine exits silently."
+  },
+
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "skip_fomc_days": true,
+    "skip_cpi_days": true,
+    "skip_nfp_days": true,
+    "skip_pce_days": true,
+    "description": "Any condition set true fires a kill-switch — no signals are issued that day."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "max_signals_per_run": 3,
+    "counter_trend_min_categories": 5,
+    "post_earnings_min_categories": 5,
+    "description": "min_categories_for_buy: raise to 5 for higher conviction-only days. max_signals_per_run: never exceed 3 concurrent signals."
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_risk_pct_per_trade": 2.0,
+    "description": "stop = entry - (stop_atr_multiplier × ATR14). target = entry + (target_atr_multiplier × ATR14). R:R must be >= min_rr."
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_confluence_boost": 1,
+    "description": "Tickers within blackout_trading_days_before of earnings (or blackout_trading_days_after since last earnings) are excluded. First eligible day after blackout requires post_earnings_confluence_boost extra confirms."
+  },
+
+  "vix_regime": {
+    "complacency_below": 15,
+    "normal_upper": 20,
+    "caution_upper": 25,
+    "tighten_upper": 30,
+    "description": "VIX <15 = complacency (tighter stops). 15-20 = normal. 20-25 = caution (only HIGH confidence 5-6/6). 25-30 = tighten further + size note. >30 = kill-switch fires."
+  },
+
+  "volume": {
+    "confirm_threshold_pct": 100,
+    "strong_confirm_threshold_pct": 150,
+    "weak_threshold_pct": 70,
+    "breakout_min_pct": 120,
+    "description": "Volume as % of 20-day average. Below weak_threshold = auto non-confirm. Breakout candles need breakout_min_pct."
+  }
 }

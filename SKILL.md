@@ -7,7 +7,7 @@ description: Use when generating daily pre-market BUY signals for the 12-ticker 
 
 This is the file the routine runs. Follow it in order. Each step has a clear stop condition.
 
-## 0. Read configuration
+## 0. Read configuration and check signal window
 
 Always start by reading:
 
@@ -17,13 +17,15 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+**Signal window gate:** Check the current UTC time against `runtime.signal_window_gmt.start` and `runtime.signal_window_gmt.end` (default 02:30–08:30 GMT). If the current time is outside that window, exit silently — do not post to Slack. This prevents accidental re-runs or manual triggers outside the intended pre-market window.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -86,19 +88,21 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 | Macro | SPY & QQQ futures green AND VIX < 20 |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
-**Decision rule:**
+**Decision rule** (thresholds from `runtime.confluence`):
 
 - 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
+- `runtime.confluence.min_categories_for_buy` (default 4) confirms → MEDIUM confidence BUY — note smaller position size in Slack
 - ≤3 confirms → WAIT (no signal output)
+- Counter-trend setups (weekly bear + daily bull) require `runtime.confluence.counter_trend_min_categories` (default 5)
+- First day back after earnings blackout requires `runtime.confluence.post_earnings_min_categories` (default 5)
 
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`runtime.risk.stop_atr_multiplier` × ATR14) — default 1.5×
+- **Target:** entry + (`runtime.risk.target_atr_multiplier` × ATR14) — default 3.0×
+- **Risk:reward:** must be ≥ `runtime.risk.min_rr` (default 2.0)
 
 If R:R fails, downgrade to WAIT.
 
