@@ -86,31 +86,36 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 | Macro | SPY & QQQ futures green AND VIX < 20 |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
-**Decision rule:**
+**Decision rule** (thresholds from `config/runtime.json → confluence`):
 
 - 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
+- 4 confirms → MEDIUM confidence BUY (smaller size note in Slack)
 - ≤3 confirms → WAIT (no signal output)
+
+Counter-trend exception: if `framework/09-multi-timeframe.md` sets the counter-trend flag, the BUY bar raises to `min_categories_for_buy_counter_trend` (default 5/6).
 
 ## 6. Risk gate (must pass to issue BUY)
 
-Compute:
+Compute (multipliers from `config/runtime.json → risk`):
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`stop_atr_multiplier` × ATR14) — default 1.5×
+- **Target:** entry + (`target_atr_multiplier` × ATR14) — default 3.0×
+- **Risk:reward:** target distance ÷ stop distance — must be ≥ `min_rr` (default 2.0)
 
-If R:R fails, downgrade to WAIT.
+If R:R fails, downgrade to WAIT. Record the computed stop, target, entry zone, and R:R for the Slack signal block.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack MCP connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`.
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Template selection:
+- One or more BUY signals → **Template A**
+- Kill-switch fired (VIX, FOMC, CPI, NFP) → **Template B**
+- No kill-switch but all tickers scored ≤3/6 → **Template C**
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+For Template A, populate every `{PLACEHOLDER}` in the signal block. The "also watching" list shows all tickers that scored exactly 3/6. Tickers that scored ≤2/6 are omitted silently.
 
-Never change the template file. 
+Use Slack mrkdwn syntax (no HTML). Do not post any other Slack messages during the run. Do not update any file in the repo during the run.
 
 
 ## 8. Hard rules — never violate
