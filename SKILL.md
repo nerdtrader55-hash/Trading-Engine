@@ -23,7 +23,7 @@ Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -32,7 +32,7 @@ If **any** fire: post the kill-switch Slack message from `templates/slack-output
 
 ## 2. Earnings blackout (per-ticker)
 
-For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within **3 trading days** in either direction of today, exclude it from analysis and note it in the Slack footer.
+For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within `runtime.earnings.blackout_trading_days_before` trading days before — or `runtime.earnings.blackout_trading_days_after` trading day after — today, exclude it from analysis and note it in the Slack footer.
 
 ## 3. Data pull per surviving ticker
 
@@ -89,22 +89,28 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 **Decision rule:**
 
 - 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
-- ≤3 confirms → WAIT (no signal output)
+- 4 confirms → MEDIUM confidence BUY (smaller size note) — raise bar to 5/6 when weekly trend is counter to daily (see `framework/09-multi-timeframe.md`)
+- ≤3 confirms → WAIT (no signal output — list in "Also Watching" section if score is exactly 3)
 
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`runtime.risk.stop_atr_multiple` × ATR14)  — default 1.5×
+- **Target:** entry + (`runtime.risk.target_atr_multiple` × ATR14) — default 3.0×
+- **Risk:reward:** must be ≥ `runtime.risk.min_rr` (default 2.0)
 
 If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags).
+
+- If signals were issued → use **Template A**
+- If a macro kill-switch fired → use **Template B**
+- If the run completed cleanly but no ticker reached 4/6 confluence → use **Template C**
+
+Always include:
 
 DO not update anything into stock files or this repo during the run. This is an output-only engine.
 
