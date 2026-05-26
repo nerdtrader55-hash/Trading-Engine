@@ -104,13 +104,27 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+**Always include in the message:**
+- Today's date and time in GMT
+- Macro snapshot: VIX level, SPY futures %, QQQ futures %, DXY, 10Y yield
+- Each BUY signal block: ticker, confidence (HIGH/MEDIUM), confluence score (n/6), entry zone, stop, target, R:R, confluence category icons, top headline
+- "Also watching" list: tickers that scored 3/6 — one line each showing score and what's missing
+- Earnings blackout list (tickers excluded this run)
+- Data failure list (tickers skipped due to API errors)
+- Risk disclaimer
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+**Template selection:**
+- BUY signals present → Template A
+- Kill-switch fired (VIX, FOMC, CPI, NFP) → Template B
+- All tickers WAIT, no kill-switch → Template C
 
-Never change the template file. 
+Do not update anything into stock files or this repo during the run. This is an output-only engine.
+
+Post exactly one Slack message per run using the template. Do not post any other messages during the run.
+
+Never change the template file.
 
 
 ## 8. Hard rules — never violate
