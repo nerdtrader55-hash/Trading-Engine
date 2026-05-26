@@ -17,14 +17,16 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+**Signal window check:** Signals are only valid between `runtime.signal_window.start_gmt` (02:30 GMT) and `runtime.signal_window.end_gmt` (08:30 GMT). If the current UTC time is outside this window, post a brief Slack note ("Outside signal window — next run at 02:30 GMT") and exit without analyzing any tickers.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
-| FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
+| VIX level | `>= runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| FOMC day | Today is an FOMC announcement day | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
 
@@ -81,51 +83,56 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 |---|---|
 | Trend | Price > EMA20 > EMA50 > EMA200 (bull stack) |
 | Momentum | RSI 40–65 AND MACD bullish cross or above signal |
-| Volume | Today's volume > 20-day avg AND rising on up-days |
+| Volume | Today's volume > `runtime.volume.confirm_pct`% of 20-day avg AND rising on up-days |
 | Price action | Recent support hold OR clean breakout with retest |
 | Macro | SPY & QQQ futures green AND VIX < 20 |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
 **Decision rule:**
 
-- 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
+- 5–6 confirms → HIGH confidence BUY (label: HIGH)
+- 4 confirms → MEDIUM confidence BUY (label: MEDIUM, note smaller position size)
 - ≤3 confirms → WAIT (no signal output)
+
+**Threshold adjustments from module 09:**
+- Counter-trend setup (weekly bear + daily bull) → raise bar to `runtime.confluence.counter_trend_min_categories` (default 5)
+- First session post-earnings blackout → raise bar to `runtime.earnings.post_earnings_raised_bar` (default 5)
+
+**Signal cap:** Never output more than `runtime.confluence.max_signals_per_run` (default 3) BUY signals in a single run. If more qualify, keep the highest-scoring ones; break ties by pattern-tag count, then historical analog hit rate.
 
 ## 6. Risk gate (must pass to issue BUY)
 
-Compute:
+Compute using the entry midpoint (midpoint of `entry_zone_low` and `entry_zone_high` from module 09):
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`runtime.risk.stop_atr_multiple` × ATR14) = entry − (1.5 × ATR14)
+- **Target:** entry + (`runtime.risk.target_atr_multiple` × ATR14) = entry + (3.0 × ATR14)
+- **Risk:reward:** (target − entry) / (entry − stop) must be ≥ `runtime.risk.min_rr` (default 2.0)
 
-If R:R fails, downgrade to WAIT.
+If R:R fails, downgrade to WAIT. Never emit a signal with R:R below 2.0 regardless of confluence score.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack MCP connector. Channel = `runtime.slack_channel_id`. Format = exactly the matching template from `templates/slack-output.md`:
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+- BUY signals present → Template A
+- Kill-switch fired → Template B
+- No qualifying signals → Template C
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+Fill every placeholder. For missing data fields (API errors), replace with `N/A` and note it in the message footer.
 
-Never change the template file. 
-
+Post exactly **one** Slack message per run. Do not post progress updates or intermediate messages.
 
 ## 8. Hard rules — never violate
 
-These come from section 9 of the original spec:
-
-- Never issue a signal within 3 trading days of earnings
-- Never claim guaranteed profits — include the risk note in the Slack message
-- Never issue more than 3 concurrent signals
-- Never skip macro checks
-- Never issue a signal on fewer than 4 confirming categories
-- Never issue a signal with R:R below 1:2
+- Never issue a signal within `runtime.earnings.blackout_trading_days_before` trading days of earnings
+- Never claim guaranteed profits — the risk disclaimer line is mandatory in every message
+- Never issue more than `runtime.confluence.max_signals_per_run` (3) BUY signals in a single run
+- Never skip the macro kill-switch checks (step 1)
+- Never issue a signal on fewer than `runtime.confluence.min_categories_for_buy` (4) confirming categories
+- Never issue a signal with R:R below `runtime.risk.min_rr` (2.0)
 - Never execute trades — this is a signal engine, output only
 - Never commit anything to this repo during a run
-- Never post signals to Slack other than slackoutput template
+- Never fabricate prices, indicator values, or news headlines
 
 ## 9. End the run
 

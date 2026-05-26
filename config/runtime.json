@@ -4,5 +4,55 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "note": "Signals are generated only within this window. Outside these hours the routine should post a note and exit."
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "note": "If live VIX is at or above vix_max, post kill-switch message and stop. No signals regardless of confluence."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "min_categories_high_confidence": 5,
+    "max_signals_per_run": 3,
+    "counter_trend_min_categories": 5,
+    "note": "min_categories_for_buy=4 for with-trend setups. Raise to 5 for counter-trend (weekly bear + daily bull). max_signals_per_run caps concurrent open signals."
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiple": 1.5,
+    "target_atr_multiple": 3.0,
+    "max_account_risk_pct": 2.0,
+    "note": "Stop = entry - (stop_atr_multiple * ATR14). Target = entry + (target_atr_multiple * ATR14). R:R must be >= min_rr or the signal is downgraded to WAIT."
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_raised_bar": 5,
+    "note": "Exclude ticker for blackout_trading_days_before days before earnings and blackout_trading_days_after day after. First eligible day post-blackout requires post_earnings_raised_bar confluence."
+  },
+
+  "vix_regime": {
+    "complacency_max": 15,
+    "normal_max": 20,
+    "caution_max": 25,
+    "elevated_max": 30,
+    "note": "Shapes position-sizing notes in the Slack message. Above elevated_max the macro kill-switch fires."
+  },
+
+  "volume": {
+    "strong_confirm_pct": 150,
+    "confirm_pct": 100,
+    "neutral_pct": 70,
+    "breakout_min_pct": 120,
+    "note": "Volume as % of 20-day average. Below neutral_pct on a breakout day = automatic non-confirm."
+  }
 }
