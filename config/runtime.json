@@ -1,8 +1,75 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Runtime knobs. Edit freely; the routine reads these on every run.",
+  "description": "Runtime knobs. Edit freely; the routine reads these on every run. No code changes needed — all thresholds live here.",
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "_comment_vix": "If VIX closes above this level, post kill-switch message and stop — no ticker analysis.",
+    "skip_fomc_day": true,
+    "skip_cpi_day": true,
+    "skip_nfp_day": true
+  },
+
+  "vix_thresholds": {
+    "_comment": "Shapes position-sizing notes in the Slack output. Kill-switch is in macro_kill_switches.vix_max above.",
+    "complacency_below": 15,
+    "normal_up_to": 20,
+    "caution_up_to": 25,
+    "tighten_up_to": 30
+  },
+
+  "confluence": {
+    "_comment": "Core signal gates.",
+    "min_categories_for_buy": 4,
+    "_comment_counter_trend": "Counter-trend setups (weekly bear + daily bull) require 5/6 instead of 4/6.",
+    "min_categories_for_buy_counter_trend": 5,
+    "_comment_post_earnings": "First signal on a ticker after earnings blackout ends requires 5/6 for one day.",
+    "min_categories_post_earnings_day_1": 5,
+    "max_signals_per_run": 3,
+    "_comment_max_signals": "If more than 3 tickers qualify, rank by confluence score, then pattern-tag count, then historical-analog hit rate."
+  },
+
+  "risk": {
+    "_comment": "Applied at the risk-gate step in SKILL.md. ATR multiples follow the Renaissance approach of volatility-normalised stops.",
+    "max_account_risk_pct": 2.0,
+    "min_rr": 2.0,
+    "stop_atr_multiple": 1.5,
+    "target_atr_multiple": 3.0,
+    "_comment_sizing": "Confidence note in Slack message: HIGH confidence (5-6/6) = full size; MEDIUM (4/6) = half size."
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "_comment": "Counts trading days only (Mon-Fri excluding NYSE holidays). Day 0 = earnings day itself."
+  },
+
+  "data_pull": {
+    "_comment": "Alpha Vantage call budget. Free tier = 25/day; paid = 500+. Adjust lookbacks if rate-limited.",
+    "daily_ohlcv_days": 260,
+    "hourly_ohlcv_days": 5,
+    "ema_periods": [20, 50, 200],
+    "rsi_period": 14,
+    "macd_fast": 12,
+    "macd_slow": 26,
+    "macd_signal": 9,
+    "bbands_period": 20,
+    "atr_period": 14,
+    "news_sentiment_days": 1,
+    "_comment_rate_limit": "If Alpha Vantage returns rate-limit errors, skip that ticker and add it to the failures list in the Slack footer. Do not retry in the same run."
+  },
+
+  "pattern_recognition": {
+    "_comment": "Thresholds for framework/10-statistical-patterns.md.",
+    "correlation_lookback_days": 60,
+    "analog_min_occurrences": 3,
+    "_comment_analog": "Historical analog note only shown if 3+ prior occurrences exist in the lookback window.",
+    "volume_spike_threshold_x": 3.0,
+    "tight_range_fraction_of_atr": 0.5,
+    "coiling_min_sessions": 3
+  }
 }

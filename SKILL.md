@@ -104,13 +104,23 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`.
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Pick the correct template from `templates/slack-output.md`:
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+| Outcome | Template |
+|---|---|
+| Macro kill-switch fired in step 1 | **Template B** — post and stop. |
+| All tickers checked, none reached 4/6 | **Template C** — WAIT message. |
+| At least one BUY signal | **Template A** — full signal block. |
 
-Never change the template file. 
+Fill every `{PLACEHOLDER}` in the chosen template with real fetched values. Write `N/A` for any value that could not be computed — never fabricate prices, percentages, or indicator values.
+
+Hard rules for this step:
+- One Slack message per run — never split.
+- Never modify the template file.
+- Do not post any other messages (no "starting analysis…", no progress updates).
+- Do not update anything in this repo during the run — output-only engine.
 
 
 ## 8. Hard rules — never violate
