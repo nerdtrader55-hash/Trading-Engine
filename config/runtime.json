@@ -4,5 +4,37 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "trading_window": {
+    "description": "Signals generated only within this GMT window",
+    "start_gmt": "02:30",
+    "end_gmt": "08:30"
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "description": "If VIX > vix_max, issue WAIT on all stocks regardless of other signals"
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "description": "Minimum risk:reward ratio. If target is not at least 2x the stop, skip the trade.",
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_account_risk_pct": 2.0
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "min_categories_high_confidence": 5,
+    "max_signals_per_run": 3,
+    "description": "5-6 confirms = HIGH confidence, 4 = MEDIUM confidence, <=3 = WAIT"
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "description": "Never signal within this many trading days of an earnings event"
+  }
 }

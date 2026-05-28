@@ -17,13 +17,21 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.5. Trading window check
+
+Signals are generated **only** during the window defined in `runtime.trading_window` (default 02:30 GMT – 08:30 GMT).
+
+- Get the current time in the `timezone` from `runtime.json`.
+- If the current time is **outside** 02:30–08:30 GMT, post the kill-switch Slack message with reason "Outside trading window (signals run 02:30–08:30 GMT)" and stop.
+- US market opens at 14:30 GMT. Signals must land well before open to allow review.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -96,15 +104,15 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`runtime.risk.stop_atr_multiplier` × ATR14) — default 1.5
+- **Target:** entry + (`runtime.risk.target_atr_multiplier` × ATR14) — default 3.0
+- **Risk:reward:** must be ≥ `runtime.risk.min_rr` (default 2.0 = 1:2)
 
 If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Cap signals at `runtime.confluence.max_signals_per_run` (default 3). Use markdown that Slack will render correctly (no HTML tags). Always include:
 
 DO not update anything into stock files or this repo during the run. This is an output-only engine.
 
