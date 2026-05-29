@@ -3,6 +3,29 @@
   "description": "Runtime knobs. Edit freely; the routine reads these on every run.",
 
   "timezone": "Europe/London",
+  "slack_channel_id": "C0B2CTBAV9B",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "signal_window_gmt": {
+    "description": "Signals are only generated inside this window. Outside it, the routine exits without analysis.",
+    "start": "02:30",
+    "end": "08:30"
+  },
+
+  "vix_max": 30,
+  "vix_caution_threshold": 25,
+  "vix_tighten_threshold": 20,
+
+  "confluence_threshold_normal": 4,
+  "confluence_threshold_counter_trend": 5,
+
+  "min_rr": 2.0,
+  "atr_stop_multiplier": 1.5,
+  "atr_target_multiplier": 3.0,
+
+  "max_signals_per_run": 3,
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1
+  }
 }

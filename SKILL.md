@@ -17,6 +17,15 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.5. Signal window check
+
+Check the current time in `Europe/London` (runtime `timezone`).
+
+Signals are only generated between `signal_window_gmt.start` (02:30 GMT) and `signal_window_gmt.end` (08:30 GMT).
+
+- **Inside window** → continue.
+- **Outside window** → exit silently. Do not post to Slack. Do not analyse tickers.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
@@ -104,13 +113,25 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Use Slack-compatible markdown (no HTML).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Pick the correct template from `templates/slack-output.md`:
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+| Outcome | Template |
+|---|---|
+| ≥1 BUY signal qualified | Template A (one signal block per ticker, max 3) |
+| Kill-switch fired in step 1 | Template B |
+| Analysis complete, no tickers qualified | Template C |
 
-Never change the template file. 
+Populate every placeholder field. Include:
+- The macro header (VIX, SPY/QQQ direction, DXY trend)
+- One signal block per qualifying ticker (ticker, confidence, entry zone, stop, target, R:R)
+- Pattern note if module 10 produced one with ≥3 historical occurrences
+- "Also watching" list (tickers that were close but below threshold)
+- Earnings blackout footer listing excluded tickers and their next earnings date
+- Risk disclaimer line
+
+Do not post any other messages during the run. Do not change the template file. Do not commit or write anything to the repo.
 
 
 ## 8. Hard rules — never violate
