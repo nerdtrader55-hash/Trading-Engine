@@ -4,5 +4,47 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "target_delivery_gmt": "06:00",
+    "note": "Signals generated and posted only within this GMT window on US trading days."
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "note": "VIX above this value halts all signals for the session."
+  },
+
+  "vix_thresholds": {
+    "supportive_below": 15,
+    "normal_max": 20,
+    "caution_max": 25,
+    "high_confidence_required_above": 20,
+    "note": "VIX 20-25 raises confluence bar to 5/6. VIX 25-30 adds position-sizing note. VIX >30 is the kill switch."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "high_confidence_threshold": 5,
+    "max_signals_per_run": 3,
+    "headwind_min_categories": 5,
+    "note": "headwind_min_categories applies when SPY+QQQ futures both red or VIX 20-25."
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "atr_stop_multiplier": 1.5,
+    "atr_target_multiplier": 3.0,
+    "max_account_risk_pct": 2.0,
+    "note": "Stop = entry - (stop_multiplier * ATR14). Target = entry + (target_multiplier * ATR14). R:R must be >= min_rr."
+  },
+
+  "earnings": {
+    "blackout_days_before": 3,
+    "blackout_days_after": 1,
+    "note": "Tickers with earnings within blackout_days_before OR blackout_days_after of today are excluded."
+  }
 }
