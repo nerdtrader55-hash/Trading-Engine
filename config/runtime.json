@@ -4,5 +4,32 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "target_delivery_gmt": "06:00"
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_account_risk_pct": 2.0
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1
+  }
 }

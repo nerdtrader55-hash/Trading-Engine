@@ -17,7 +17,16 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
-## 1. Macro kill-switches (check first, fail fast)
+## 1. Signal window check
+
+Check the current time in GMT. Signals are only generated inside the window defined in `runtime.signal_window`:
+
+- `start_gmt`: 02:30
+- `end_gmt`: 08:30
+
+If the current time is **outside** this window, post nothing to Slack and exit immediately. Do not run macro checks or analyze tickers. This prevents stale signals from firing outside pre-market hours.
+
+## 2. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
 
@@ -30,11 +39,11 @@ Pull these via Alpha Vantage MCP or `web_search`:
 
 If **any** fire: post the kill-switch Slack message from `templates/slack-output.md`, then **stop**. Do not analyze tickers.
 
-## 2. Earnings blackout (per-ticker)
+## 3. Earnings blackout (per-ticker)
 
 For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within **3 trading days** in either direction of today, exclude it from analysis and note it in the Slack footer.
 
-## 3. Data pull per surviving ticker
+## 4. Data pull per surviving ticker
 
 For each ticker that passes the earnings blackout, fetch from Alpha Vantage MCP:
 
@@ -58,7 +67,7 @@ Also pull **once per run** (not per ticker):
 
 If any required call returns null/error for a ticker, skip that ticker and add it to the failures list.
 
-## 4. Apply the 10-module framework
+## 5. Apply the 10-module framework
 
 Read each file under `framework/` and apply it. Each module outputs a directional read for the ticker:
 
@@ -69,11 +78,11 @@ Read each file under `framework/` and apply it. Each module outputs a directiona
 - `05-volatility.md`
 - `06-macro.md`
 - `07-sentiment.md`
-- `08-earnings-events.md` (already partially applied in step 2)
+- `08-earnings-events.md` (already partially applied in step 3)
 - `09-multi-timeframe.md`
 - `10-statistical-patterns.md`
 
-## 5. Confluence score
+## 6. Confluence score
 
 Roll the 10 modules into 6 confluence categories (this is the gate):
 
@@ -92,7 +101,7 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 - 4 confirms → MEDIUM confidence BUY (smaller size note)
 - ≤3 confirms → WAIT (no signal output)
 
-## 6. Risk gate (must pass to issue BUY)
+## 7. Risk gate (must pass to issue BUY)
 
 Compute:
 
@@ -102,7 +111,7 @@ Compute:
 
 If R:R fails, downgrade to WAIT.
 
-## 7. Post to Slack
+## 8. Post to Slack
 
 Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
 
@@ -113,7 +122,7 @@ Just post exactly same template-based message to Slack, with the BUY signals and
 Never change the template file. 
 
 
-## 8. Hard rules — never violate
+## 9. Hard rules — never violate
 
 These come from section 9 of the original spec:
 
@@ -127,6 +136,6 @@ These come from section 9 of the original spec:
 - Never commit anything to this repo during a run
 - Never post signals to Slack other than slackoutput template
 
-## 9. End the run
+## 10. End the run
 
 Post the Slack message. Done. Do not loop. Do not start another analysis pass. Exit cleanly.
