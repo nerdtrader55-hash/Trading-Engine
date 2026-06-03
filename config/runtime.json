@@ -4,5 +4,22 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "macro_kill_switches": {
+    "vix_max": 30
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "min_categories_for_high_confidence": 5,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "earnings_blackout_trading_days": 3
+  }
 }

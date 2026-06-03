@@ -23,7 +23,7 @@ Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -86,31 +86,35 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 | Macro | SPY & QQQ futures green AND VIX < 20 |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
-**Decision rule:**
+**Decision rule** (thresholds from `runtime.confluence`):
 
-- 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
-- ≤3 confirms → WAIT (no signal output)
+- `min_categories_for_high_confidence` (default 5) or 6 confirms → HIGH confidence BUY
+- `min_categories_for_buy` (default 4) confirms → MEDIUM confidence BUY (smaller size note)
+- Below `min_categories_for_buy` → WAIT (no signal output)
 
 ## 6. Risk gate (must pass to issue BUY)
 
-Compute:
+Compute (multipliers from `runtime.risk`):
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`stop_atr_multiplier` × ATR14) — default 1.5 × ATR14
+- **Target:** entry + (`target_atr_multiplier` × ATR14) — default 3.0 × ATR14
+- **Risk:reward:** must be ≥ `runtime.risk.min_rr` (default 2.0 = 1:2)
 
 If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Always include:
+- The signal lines: `{TICKER} : BUY` (one per signal, max `runtime.confluence.max_signals_per_run`, default 3 — highest confluence wins ties)
+- The "Also watching (WAIT)" list for tickers that didn't reach threshold
+- The "Excluded (earnings)" list for blacked-out tickers
+- The risk disclaimer footer
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+Pick the correct template (A/B/C) per the selection rules in `templates/slack-output.md`.
 
-Never change the template file. 
+Post exactly one message per run. Do not post any other messages. Do not update anything in this repo during the run — this is an output-only engine. Never modify the template file.
 
 
 ## 8. Hard rules — never violate
