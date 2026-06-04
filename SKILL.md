@@ -17,6 +17,8 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+**Timing gate:** Check the current GMT time. Signals are generated only within the window defined by `runtime.trading_window` (`02:30–08:30 GMT`). If the routine fires outside this window, post a brief Slack note ("Signal engine ran outside the trading window — no signals issued.") and stop immediately. Do not analyse any tickers.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
@@ -104,13 +106,27 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack MCP connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack renders correctly (asterisks for bold, no HTML tags).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+**Template selection:**
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+| Outcome | Template |
+|---|---|
+| ≥1 BUY signal | Template A |
+| Kill-switch fired (step 1) | Template B |
+| No qualifying signals (no kill-switch) | Template C |
 
-Never change the template file. 
+**Always include in the message:**
+- Signals list (one `{TICKER} : BUY  [HIGH/MEDIUM]` line per signal, max 3)
+- "Also watching" list — tickers that scored exactly 3/6 (close misses)
+- "Skipped / earnings blackout" list — tickers excluded under step 2
+- Risk disclaimer line
+
+**Do not:**
+- Update any files in this repo during the run
+- Post more than one Slack message per run
+- Change the template file
+- Post partial updates or debug messages to Slack
 
 
 ## 8. Hard rules — never violate

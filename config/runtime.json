@@ -4,5 +4,40 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "trading_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "note": "Signals generated only within this GMT window. Routine will abort outside it."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "max_signals_per_run": 3,
+    "note": "Raise min_categories_for_buy to 5 for stricter filtering in choppy markets"
+  },
+
+  "risk": {
+    "vix_max": 30,
+    "vix_caution": 25,
+    "min_rr": 2.0,
+    "stop_atr_multiple": 1.5,
+    "target_atr_multiple": 3.0,
+    "max_account_risk_pct": 2.0,
+    "note": "vix_max triggers full kill-switch. vix_caution raises confluence bar to 5/6."
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "note": "No signals within this window around any earnings date"
+  },
+
+  "macro_kill_switches": {
+    "block_fomc_days": true,
+    "block_cpi_days": true,
+    "block_nfp_days": true,
+    "note": "Set to false only if you want signals on those days (not recommended)"
+  }
 }
