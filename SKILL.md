@@ -17,6 +17,12 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.5. Signal window check
+
+Check the current GMT time. Signals are only generated during the window defined in `runtime.signal_window_gmt_start` to `runtime.signal_window_gmt_end` (default **02:30–08:30 GMT**).
+
+If the current time is **outside** this window, stop immediately without posting to Slack. This is a silent exit — the routine may have been triggered manually outside schedule.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
@@ -28,11 +34,13 @@ Pull these via Alpha Vantage MCP or `web_search`:
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
 
-If **any** fire: post the kill-switch Slack message from `templates/slack-output.md`, then **stop**. Do not analyze tickers.
+If **any** fire: post the kill-switch Slack message from `templates/slack-output.md` Template B, then **stop**. Do not analyze tickers.
 
 ## 2. Earnings blackout (per-ticker)
 
-For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within **3 trading days** in either direction of today, exclude it from analysis and note it in the Slack footer.
+For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within `runtime.earnings.blackout_trading_days_before` trading days before or `runtime.earnings.blackout_trading_days_after` trading days after today, exclude it from analysis and note it in the Slack footer.
+
+When a ticker re-enters after the blackout ends, require `runtime.earnings.post_earnings_raised_confluence` (default 5/6) for that first session only.
 
 ## 3. Data pull per surviving ticker
 
@@ -45,6 +53,7 @@ For each ticker that passes the earnings blackout, fetch from Alpha Vantage MCP:
 | EMA 20 / 50 / 200 daily | `EMA` time_period=20/50/200 | Trend alignment |
 | RSI 14 daily | `RSI` time_period=14 | Momentum |
 | MACD daily | `MACD` (12,26,9) | Momentum crossovers |
+| Stochastic 14,3,3 daily | `STOCH` | Momentum confirmation |
 | Bollinger Bands daily | `BBANDS` time_period=20 | Volatility squeeze |
 | ATR 14 daily | `ATR` time_period=14 | Stop-loss sizing |
 | VWAP intraday | `VWAP` | Institutional anchor |
@@ -81,51 +90,55 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 |---|---|
 | Trend | Price > EMA20 > EMA50 > EMA200 (bull stack) |
 | Momentum | RSI 40–65 AND MACD bullish cross or above signal |
-| Volume | Today's volume > 20-day avg AND rising on up-days |
+| Volume | Today's volume > `runtime.min_volume_vs_20d_avg_pct`% of 20-day avg AND rising on up-days |
 | Price action | Recent support hold OR clean breakout with retest |
-| Macro | SPY & QQQ futures green AND VIX < 20 |
+| Macro | SPY & QQQ futures green AND VIX < `runtime.vix_caution` (default 20) |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
 **Decision rule:**
 
-- 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
-- ≤3 confirms → WAIT (no signal output)
+- `>= runtime.high_confidence_confluence` (default 5–6) confirms → **HIGH** confidence BUY
+- `>= runtime.min_confluence` (default 4) confirms → **MEDIUM** confidence BUY (note smaller size)
+- `< runtime.min_confluence` (default ≤3) confirms → **WAIT** — no signal output for this ticker
 
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
+- **Stop:** entry − (`runtime.stop_atr_multiplier` × ATR14) — default entry − 1.5×ATR
+- **Target:** entry + (`runtime.target_atr_multiplier` × ATR14) — default entry + 3.0×ATR
 - **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
 
 If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Use markdown that Slack will render correctly (no HTML tags).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Pick the template from `templates/slack-output.md` based on the outcome:
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+- **BUY signals exist** → Template A. Max `runtime.max_concurrent_signals` (default 3) tickers. Rank by confluence score if more qualify.
+- **Kill-switch fired** → Template B. Already sent in step 1 — do not post again.
+- **No tickers reached min_confluence** (but no kill-switch) → Template C.
 
-Never change the template file. 
+Do not update anything into stock files or this repo during the run. This is an output-only engine.
 
+Post exactly the template-based message to Slack. Do not post any other messages during the run.
+
+Never change the template file.
 
 ## 8. Hard rules — never violate
 
-These come from section 9 of the original spec:
-
-- Never issue a signal within 3 trading days of earnings
+- Never issue a signal within `runtime.earnings.blackout_trading_days_before` trading days of earnings
 - Never claim guaranteed profits — include the risk note in the Slack message
-- Never issue more than 3 concurrent signals
+- Never issue more than `runtime.max_concurrent_signals` concurrent signals
 - Never skip macro checks
-- Never issue a signal on fewer than 4 confirming categories
-- Never issue a signal with R:R below 1:2
+- Never issue a signal on fewer than `runtime.min_confluence` confirming categories
+- Never issue a signal with R:R below `runtime.min_rr`
 - Never execute trades — this is a signal engine, output only
 - Never commit anything to this repo during a run
-- Never post signals to Slack other than slackoutput template
+- Never post signals to Slack other than the slack-output templates
+- If VIX > `runtime.vix_max`, issue Template B regardless of all other signals
 
 ## 9. End the run
 
