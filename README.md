@@ -13,7 +13,7 @@ Inspired by the Simons / Renaissance approach: public data, multi-factor conflue
 ```
                     ┌────────────────────────────────┐
                     │ Claude Code Routine (cloud)    │
-                    │  • cron: 2:30PM GMT-TZ daily   │
+                    │  • cron: 06:00 AM GMT daily    │
                     │  • clones this repo            │
                     │  • reads SKILL.md + framework/ │
                     └──────────────┬─────────────────┘
@@ -26,7 +26,7 @@ Inspired by the Simons / Renaissance approach: public data, multi-factor conflue
         └──────────────┘   └──────────────┘   └──────────────┘
 ```
 
-Every weekday at 02:30PM GMT time, the routine:
+Every weekday at 06:00 AM GMT (signal window: 02:30–08:30 AM GMT), the routine:
 
 1. Loads the 12-ticker universe from `config/stocks.json`
 2. Skips any ticker within 3 trading days of earnings (checked live via Alpha Vantage `EARNINGS_CALENDAR`)
@@ -53,7 +53,7 @@ gh repo fork <your-org>/claude-trading-signals --clone
 # 4. Go to claude.ai/code/routines → New routine
 #    - Repository: this repo
 #    - Connectors: Alpha Vantage, Slack
-#    - Trigger: schedule, weekdays 06:00 your-timezone
+#    - Trigger: schedule, weekdays 06:00 AM GMT (Europe/London)
 #    - Prompt: paste ROUTINE_PROMPT.md verbatim
 ```
 
@@ -66,7 +66,7 @@ gh repo fork <your-org>/claude-trading-signals --clone
 | `ROUTINE_PROMPT.md` | Paste this into the routine's prompt field. Short on purpose — it delegates to `SKILL.md`. |
 | `SKILL.md` | The operational playbook Claude follows. Loaded automatically by Claude Code. |
 | `config/stocks.json` | 12-ticker universe. Edit to add/remove. |
-| `config/runtime.json` | Risk caps, confluence thresholds, VIX kill-switch, max concurrent positions. |
+| `config/runtime.json` | Risk caps, confluence thresholds, VIX kill-switch, ATR multipliers, signal window, earnings blackout rules. |
 | `framework/` | The 40-50 point analysis framework broken into 10 modules. |
 | `templates/slack-output.md` | The exact Slack message format. |
 | `SETUP.md` | Step-by-step first-run guide. |

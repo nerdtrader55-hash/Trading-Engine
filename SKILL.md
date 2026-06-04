@@ -92,6 +92,15 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 - 4 confirms → MEDIUM confidence BUY (smaller size note)
 - ≤3 confirms → WAIT (no signal output)
 
+**Raised-bar adjustments (apply before scoring):**
+
+- Weekly trend bearish + daily bullish (counter-trend) → require `runtime.counter_trend_raised_bar` (default 5/6) instead of 4/6
+- VIX 20–25 → require 5/6 minimum
+- VIX >25 and ≤30 → require 6/6 minimum
+- First post-earnings signal day → require `runtime.earnings.post_earnings_raised_bar` (default 5/6)
+
+**Cap:** rank all passing tickers by score (highest first), emit top `runtime.max_signals` (default 3).
+
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
@@ -104,13 +113,19 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`.
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+- If ≥1 BUY signal: use **Template A**. Populate all `{PLACEHOLDER}` tokens. Include:
+  - Macro snapshot line (VIX, futures direction, one-line macro note)
+  - Up to 3 BUY signals sorted by confluence score (highest first)
+  - "Also watching" list: tickers that scored exactly 3/6
+  - "Excluded for earnings" line: tickers skipped in step 2 (omit if none)
+- If all tickers scored <4/6 (no kill-switch): use **Template C**
+- If any kill-switch fired in step 1: use **Template B** (already posted in step 1 — do not double-post)
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+Do not update anything into stock files or this repo during the run. This is an output-only engine.
 
-Never change the template file. 
+Post exactly one Slack message per run using the appropriate template. Do not post additional messages. Never modify template files.
 
 
 ## 8. Hard rules — never violate
