@@ -13,7 +13,8 @@ Inspired by the Simons / Renaissance approach: public data, multi-factor conflue
 ```
                     ┌────────────────────────────────┐
                     │ Claude Code Routine (cloud)    │
-                    │  • cron: 2:30PM GMT-TZ daily   │
+                    │  • cron: 06:00 GMT daily       │
+                    │  • signal window: 02:30–08:30  │
                     │  • clones this repo            │
                     │  • reads SKILL.md + framework/ │
                     └──────────────┬─────────────────┘
@@ -26,7 +27,7 @@ Inspired by the Simons / Renaissance approach: public data, multi-factor conflue
         └──────────────┘   └──────────────┘   └──────────────┘
 ```
 
-Every weekday at 02:30PM GMT time, the routine:
+Every weekday at 06:00 GMT (inside the 02:30–08:30 GMT pre-market signal window), the routine:
 
 1. Loads the 12-ticker universe from `config/stocks.json`
 2. Skips any ticker within 3 trading days of earnings (checked live via Alpha Vantage `EARNINGS_CALENDAR`)
@@ -42,18 +43,18 @@ Every weekday at 02:30PM GMT time, the routine:
 See [`SETUP.md`](./SETUP.md) for the full walkthrough. TL;DR:
 
 ```bash
-# 1. Fork this repo and clone locally
-gh repo fork <your-org>/claude-trading-signals --clone
+# 1. Fork this repo and clone locally (or work directly in Claude Code on the web)
 
-# 2. Edit config/stocks.json and config/runtime.json to your liking
+# 2. Edit config/stocks.json if needed (12 tickers pre-loaded)
+#    Edit config/runtime.json to set your Slack channel ID
 
-# 3. In Claude (web or desktop):
-#    Settings → Connectors → enable Alpha Vantage MCP and Slack
-#
+# 3. In Claude Code settings:
+#    Settings → Connectors → enable Alpha Vantage MCP and Slack MCP
+
 # 4. Go to claude.ai/code/routines → New routine
 #    - Repository: this repo
 #    - Connectors: Alpha Vantage, Slack
-#    - Trigger: schedule, weekdays 06:00 your-timezone
+#    - Schedule: weekdays 06:00 GMT (Europe/London)
 #    - Prompt: paste ROUTINE_PROMPT.md verbatim
 ```
 

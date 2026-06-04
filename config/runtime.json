@@ -4,5 +4,74 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "schedule": {
+    "run_time_gmt": "06:00",
+    "signal_window_open_gmt": "02:30",
+    "signal_window_close_gmt": "08:30",
+    "note": "Routine fires at 06:00 GMT. Signals are only valid if posted between 02:30 and 08:30 GMT, before the US market opens at 14:30 GMT."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "min_categories_counter_trend": 5,
+    "max_signals_per_run": 3,
+    "note": "With-trend setups need 4/6; counter-trend (weekly bear vs daily bull) need 5/6."
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "atr_stop_multiplier": 1.5,
+    "atr_target_multiplier": 3.0,
+    "max_account_risk_pct": 2.0,
+    "note": "Stop = entry − (atr_stop_multiplier × ATR14). Target = entry + (atr_target_multiplier × ATR14). R:R must be ≥ min_rr or signal is downgraded to WAIT."
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "vix_high_confidence_only_above": 25,
+    "vix_caution_above": 20,
+    "note": "VIX > vix_max → stop all signals. VIX > vix_high_confidence_only_above → require 5+/6. VIX > vix_caution_above → add position-sizing caution note."
+  },
+
+  "momentum": {
+    "rsi_buy_low": 40,
+    "rsi_buy_high": 65,
+    "rsi_overbought": 70,
+    "rsi_oversold": 30,
+    "macd_bullish_cross_lookback_sessions": 5,
+    "note": "Momentum confirms BUY when RSI is in [rsi_buy_low, rsi_buy_high] AND MACD bullish."
+  },
+
+  "volume": {
+    "strong_confirm_threshold": 1.5,
+    "confirm_threshold": 1.0,
+    "neutral_threshold": 0.7,
+    "breakout_min_vs_avg": 1.2,
+    "note": "Relative to 20-day average. Below neutral_threshold = WEAK = automatic non-confirm."
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_raised_bar": true,
+    "note": "post_earnings_raised_bar: first day back after blackout requires 5/6 confluence (not 4/6)."
+  },
+
+  "volatility": {
+    "bb_squeeze_threshold": 0.7,
+    "bb_extreme_threshold": 2.0,
+    "atr_extreme_threshold": 2.0,
+    "note": "BB width < bb_squeeze_threshold × 30d avg = SQUEEZE. > bb_extreme_threshold × 30d avg AND ATR > atr_extreme_threshold × 90d avg = EXTREME → WAIT."
+  },
+
+  "sentiment": {
+    "min_score_for_confirm": 0.15,
+    "strong_positive_threshold": 0.35,
+    "negative_threshold": -0.15,
+    "strong_negative_threshold": -0.35,
+    "negative_headline_keywords": ["investigation", "lawsuit", "guidance cut", "miss", "recall", "fraud", "halted", "SEC", "DOJ", "subpoena"],
+    "note": "News sentiment score from Alpha Vantage NEWS_SENTIMENT. Must be ≥ min_score_for_confirm and no flagged keywords to confirm Sentiment category."
+  }
 }
