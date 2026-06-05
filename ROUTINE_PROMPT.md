@@ -18,9 +18,11 @@ Run order:
 
 Constraints:
 - This is a signal engine, not a trading agent. Output only — no execution.
+- Only generate signals between 02:30 GMT and 08:30 GMT. Outside this window, post the kill-switch message and stop.
+- Signal output format: `TICKER : BUY` (e.g. `NVDA : BUY`), one per line, max 3 signals.
 - If Alpha Vantage rate-limits or returns malformed data for a ticker, skip that ticker and note it in the Slack message footer.
 - Never fabricate prices, levels, or indicator values. If you can't fetch the data, you can't issue a signal.
-- All times in the output are in the user's configured timezone (config/runtime.json → `timezone`).
+- All times in the output are in GMT (Europe/London timezone from config/runtime.json).
 
 If you find yourself wanting to do something outside this scope, stop and post a note to Slack instead.
 ```

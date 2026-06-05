@@ -4,5 +4,28 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "description": "Signals generated only within this GMT window, before US open at 14:30 GMT"
+  },
+
+  "risk": {
+    "vix_max": 30,
+    "min_rr": 2.0,
+    "max_concurrent_signals": 3,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_account_risk_pct": 2.0
+  },
+
+  "confluence": {
+    "high_confidence_threshold": 5,
+    "medium_confidence_threshold": 4,
+    "min_categories_required": 4
+  },
+
+  "earnings_blackout_days": 3
 }

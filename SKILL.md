@@ -17,6 +17,12 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.5 Signal window gate
+
+Check the current time in GMT. Signals may only be issued between `runtime.signal_window.start_gmt` (02:30 GMT) and `runtime.signal_window.end_gmt` (08:30 GMT).
+
+If the current time is **outside** this window: post Template B with reason `Outside signal window (target: 02:30–08:30 GMT, pre US open)` and **stop**. Do not analyse tickers.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
@@ -104,13 +110,20 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`.
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+**Signal line format (from spec section 7):**
+```
+TICKER : SIGNAL
+```
+Example: `NVDA : BUY`
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+**Template selection:**
+- BUY signals exist → Template A (list each signal as `TICKER : BUY`, one per line, max 3)
+- Kill-switch fired → Template B
+- No signals after full scan → Template C
 
-Never change the template file. 
+Use markdown Slack will render correctly (no HTML tags). Do not update anything in this repo during the run. Do not post any other messages during the run. Never change the template file.
 
 
 ## 8. Hard rules — never violate
