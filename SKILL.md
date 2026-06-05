@@ -104,13 +104,13 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format per `templates/slack-output.md`:
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+- **BUY signals exist** → Template A. One block per signal (max 3, highest confluence first). Include entry zone, stop, target, R:R, and the three confirming confluence labels. Append "Also watching" (3/6 tickers) and "Earnings blackout" footer lines.
+- **Kill-switch fired** → Template B. State the exact kill-switch reason and the triggering value.
+- **No signals qualify** → Template C. List the highest-scoring tickers and their scores. Append "Earnings blackout" if any tickers were excluded.
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
-
-Never change the template file. 
+Use Slack markdown (bold with `*text*`, italic with `_text_`). No HTML. Do not post more than one message per run. Do not modify any repo file.
 
 
 ## 8. Hard rules — never violate
