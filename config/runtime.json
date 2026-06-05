@@ -4,5 +4,62 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window": {
+    "description": "GMT window during which pre-market signals may be generated",
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "target_delivery_gmt": "06:00"
+  },
+
+  "confluence": {
+    "description": "Scoring thresholds for the 6-category gate",
+    "min_categories_for_buy": 4,
+    "high_confidence_threshold": 5,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "description": "Risk management knobs — non-negotiable per spec section 6",
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "min_rr": 2.0,
+    "max_account_risk_pct": 2.0
+  },
+
+  "macro_kill_switches": {
+    "description": "Any of these firing halts the run entirely — see SKILL.md step 1",
+    "vix_max": 30,
+    "block_fomc_days": true,
+    "block_cpi_days": true,
+    "block_nfp_days": true
+  },
+
+  "earnings": {
+    "description": "Blackout window around earnings dates",
+    "blackout_days_before": 3,
+    "blackout_days_after": 1
+  },
+
+  "indicators": {
+    "ema_periods": [20, 50, 200],
+    "rsi_period": 14,
+    "rsi_buy_min": 40,
+    "rsi_buy_max": 65,
+    "macd_fast": 12,
+    "macd_slow": 26,
+    "macd_signal": 9,
+    "bbands_period": 20,
+    "bbands_std_dev": 2,
+    "atr_period": 14,
+    "stochastic_k": 14,
+    "stochastic_d": 3
+  },
+
+  "macro_caution_thresholds": {
+    "vix_caution": 20,
+    "dxy_strong_move_pct": 0.5,
+    "yield_spike_bps": 15
+  }
 }

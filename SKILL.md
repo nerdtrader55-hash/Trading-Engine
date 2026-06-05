@@ -7,7 +7,7 @@ description: Use when generating daily pre-market BUY signals for the 12-ticker 
 
 This is the file the routine runs. Follow it in order. Each step has a clear stop condition.
 
-## 0. Read configuration
+## 0. Read configuration and check time window
 
 Always start by reading:
 
@@ -16,6 +16,8 @@ Always start by reading:
 - `templates/slack-output.md` — output format
 
 Do not proceed until all three load successfully.
+
+Check current GMT time. Signals may only be generated between `signal_window.start_gmt` (02:30) and `signal_window.end_gmt` (08:30). If called outside this window, post a brief Slack note and stop.
 
 ## 1. Macro kill-switches (check first, fail fast)
 
@@ -104,13 +106,16 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use Slack markdown (no HTML tags).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Pick the correct template:
+- **Template A** — one or more BUY signals fired (include macro snapshot, all signal blocks, also-watching list)
+- **Template B** — a macro kill-switch fired (VIX, FOMC, CPI, NFP)
+- **Template C** — run completed but no ticker scored ≥4/6 (show top 3 setups with score and blocking reason)
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+Post exactly one message per run. Do not post intermediate status messages. Do not update any file in this repo during the run.
 
-Never change the template file. 
+Never change the template file.
 
 
 ## 8. Hard rules — never violate
