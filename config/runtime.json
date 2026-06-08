@@ -3,6 +3,31 @@
   "description": "Runtime knobs. Edit freely; the routine reads these on every run.",
 
   "timezone": "Europe/London",
+  "slack_channel_id": "C0B2CTBAV9B",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "signal_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "target_gmt": "06:00"
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "block_fomc_days": true,
+    "block_cpi_days": true,
+    "block_nfp_days": true
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "atr_stop_mult": 1.5,
+    "atr_target_mult": 3.0,
+    "max_account_risk_pct": 2.0,
+    "earnings_blackout_days": 3
+  }
 }

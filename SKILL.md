@@ -7,7 +7,7 @@ description: Use when generating daily pre-market BUY signals for the 12-ticker 
 
 This is the file the routine runs. Follow it in order. Each step has a clear stop condition.
 
-## 0. Read configuration
+## 0. Read configuration and validate signal window
 
 Always start by reading:
 
@@ -17,13 +17,15 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+**Signal window check:** Verify the current UTC time falls within the window defined by `runtime.signal_window.start_gmt` (default 02:30) and `runtime.signal_window.end_gmt` (default 08:30). If outside this window, post Template B with reason `Outside signal window — signals only generated 02:30–08:30 GMT` and stop. This prevents stale or off-hours signals reaching the channel.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -89,22 +91,28 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 **Decision rule:**
 
 - 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
-- ≤3 confirms → WAIT (no signal output)
+- `runtime.confluence.min_categories_for_buy` confirms (default 4) → MEDIUM confidence BUY (smaller size note)
+- Below threshold → WAIT (no signal output)
 
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`runtime.risk.atr_stop_mult` × ATR14)  — default 1.5
+- **Target:** entry + (`runtime.risk.atr_target_mult` × ATR14) — default 3.0
+- **Risk:reward:** must be ≥ `runtime.risk.min_rr` (default 2.0 = 1:2)
 
 If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags).
+
+- If ≥1 BUY signal fires: use **Template A**. Cap at `runtime.confluence.max_signals_per_run` signals (default 3); highest confluence scores win ties.
+- If a kill-switch fires: use **Template B**.
+- If no kill-switch but all tickers scored WAIT: use **Template C**.
+
+Always include:
 
 DO not update anything into stock files or this repo during the run. This is an output-only engine.
 
