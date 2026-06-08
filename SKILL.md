@@ -17,6 +17,13 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.5. Signal window guard
+
+Check the current GMT time. Signals are only generated within the window defined in `runtime.signal_window` (default: 02:30–08:30 GMT).
+
+- If the current time is **outside** that window: post Template B with reason `Outside window` and **stop**. Do not analyze tickers.
+- If the current time is **inside** the window: continue to step 1.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
@@ -32,7 +39,13 @@ If **any** fire: post the kill-switch Slack message from `templates/slack-output
 
 ## 2. Earnings blackout (per-ticker)
 
-For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within **3 trading days** in either direction of today, exclude it from analysis and note it in the Slack footer.
+For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). Apply the blackout windows from `runtime.earnings`:
+
+- **Before earnings:** exclude if earnings fall within `blackout_trading_days_before` trading days (default: 3)
+- **After earnings:** exclude if earnings occurred within `blackout_trading_days_after` trading days (default: 1) — avoids post-earnings whipsaw
+- **First day back:** if the ticker just exited the post-earnings blackout today, raise its confluence bar to `post_earnings_elevated_bar` (default: 5/6) for this run only
+
+Note all excluded tickers in the Slack footer with their next/most-recent earnings date.
 
 ## 3. Data pull per surviving ticker
 
@@ -94,13 +107,13 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 
 ## 6. Risk gate (must pass to issue BUY)
 
-Compute:
+Compute using multipliers from `runtime.risk`:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`stop_atr_multiplier` × ATR14) — default 1.5×
+- **Target:** entry + (`target_atr_multiplier` × ATR14) — default 3.0×
+- **Risk:reward:** target−entry divided by entry−stop; must be ≥ `risk.min_rr` (default 2.0)
 
-If R:R fails, downgrade to WAIT.
+If R:R fails, downgrade to WAIT. Cap passing signals at `confluence.max_signals_per_run` (default 3); if more pass, keep the highest-scoring ones.
 
 ## 7. Post to Slack
 

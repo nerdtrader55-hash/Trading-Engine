@@ -3,6 +3,40 @@
   "description": "Runtime knobs. Edit freely; the routine reads these on every run.",
 
   "timezone": "Europe/London",
+  "slack_channel_id": "C0B2CTBAV9B",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "signal_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "description": "Only generate and post signals within this GMT window. Runs outside this window produce no output."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "high_confidence_threshold": 5,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "min_rr": 2.0,
+    "max_account_risk_pct": 2.0,
+    "max_open_positions": 3
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "vix_caution_threshold": 20,
+    "vix_elevated_threshold": 25,
+    "skip_fomc_days": true,
+    "skip_cpi_days": true,
+    "skip_nfp_days": true
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_elevated_bar": 5
+  }
 }
