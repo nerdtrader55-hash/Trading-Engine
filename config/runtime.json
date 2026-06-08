@@ -4,5 +4,52 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window_gmt": {
+    "open": "02:30",
+    "close": "08:30",
+    "note": "Signals generated only within this window. Engine will not fire outside it."
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "vix_caution_threshold": 20,
+    "note_vix_caution": "VIX 20-25: only HIGH-confidence signals (5-6/6). VIX 25-30: add position sizing note.",
+    "block_on_fomc": true,
+    "block_on_cpi": true,
+    "block_on_nfp": true
+  },
+
+  "earnings_blackout": {
+    "trading_days_before": 3,
+    "trading_days_after": 1,
+    "note": "Exclude ticker from analysis if earnings fall within this window in either direction."
+  },
+
+  "confluence_thresholds": {
+    "high_confidence_min": 5,
+    "medium_confidence_min": 4,
+    "no_signal_max": 3,
+    "note": "5-6/6 = HIGH (act on it). 4/6 = MEDIUM (smaller size note). ≤3/6 = WAIT (no output)."
+  },
+
+  "risk": {
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "min_rr": 2,
+    "note": "Stop = entry - (stop_atr_multiplier × ATR14). Target = entry + (target_atr_multiplier × ATR14). R:R must be ≥ min_rr or signal is downgraded to WAIT."
+  },
+
+  "position_limits": {
+    "max_concurrent_signals": 3,
+    "max_account_risk_per_trade_pct": 2,
+    "note": "Never issue more than max_concurrent_signals BUY signals in a single run. Trader sizes each position to risk no more than max_account_risk_per_trade_pct of account."
+  },
+
+  "extreme_volatility_block": {
+    "bb_width_multiplier_threshold": 2.0,
+    "atr_90d_multiplier_threshold": 2.0,
+    "note": "If BB width > 2x 30d avg AND ATR > 2x 90d avg, output WAIT regardless of confluence score."
+  }
 }
