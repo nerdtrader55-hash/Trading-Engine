@@ -9,12 +9,13 @@ Today's job: produce BUY signals for the 12 tickers in config/stocks.json, follo
 
 Run order:
 1. Read SKILL.md (operational playbook) and config/runtime.json (risk caps).
-2. For each ticker in config/stocks.json, run the 10-module framework in framework/ using the Alpha Vantage MCP connector for all market data.
+2. Check signal window: if current GMT time is outside 02:30–08:30, post the out-of-window message from templates/slack-output.md and stop.
 3. Check macro kill-switches first (VIX, FOMC day, CPI/jobs day). If any fire, post the kill-switch message from templates/slack-output.md and stop.
-4. For each ticker that passes filters, score across the 6 confluence categories. Issue BUY only when score ≥ 4/6 AND risk:reward ≥ 1:2 AND not within 3 trading days of earnings.
-5. Cap output at 3 BUY signals (highest confluence wins ties).
-6. Post the formatted signal block to Slack using the connector. Use the channel specified in config/runtime.json under `slack_channel_id`.
-7. Do not place trades. Do not call any write APIs other than the Slack post. Do not commit to the repo.
+4. For each ticker in config/stocks.json, run the 10-module framework in framework/ using the Alpha Vantage MCP connector for all market data.
+5. For each ticker that passes filters, score across the 6 confluence categories. Issue BUY only when score ≥ 4/6 AND risk:reward ≥ 1:2 AND not within 3 trading days of earnings.
+6. Cap output at 3 BUY signals (highest confluence wins ties).
+7. Post the formatted signal block to Slack using the connector. Use the channel specified in config/runtime.json under `slack_channel_id`.
+8. Do not place trades. Do not call any write APIs other than the Slack post. Do not commit to the repo.
 
 Constraints:
 - This is a signal engine, not a trading agent. Output only — no execution.

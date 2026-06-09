@@ -17,13 +17,22 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.5. Signal window check
+
+Check the current UTC time against `runtime.signal_window_gmt` (default open=02:30, close=08:30).
+
+- If current time is **before 02:30 GMT or after 08:30 GMT**: post Template C from `templates/slack-output.md` and **stop**. Do not run any analysis.
+- If current time is **within the window**: continue.
+
+This guard ensures signals only reach the trader during the pre-market window, never mid-session or overnight.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -86,19 +95,21 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 | Macro | SPY & QQQ futures green AND VIX < 20 |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
-**Decision rule:**
+**Decision rule** (threshold from `runtime.confluence.min_categories_for_buy`, default 4):
 
 - 5–6 confirms → HIGH confidence BUY
 - 4 confirms → MEDIUM confidence BUY (smaller size note)
 - ≤3 confirms → WAIT (no signal output)
 
+Counter-trend setups (weekly chart bearish but daily bullish) require `runtime.confluence.counter_trend_min_categories` (default 5) confirms instead of 4.
+
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`runtime.risk.atr_stop_multiplier` × ATR14) — default 1.5×
+- **Target:** entry + (`runtime.risk.atr_target_multiplier` × ATR14) — default 3.0×
+- **Risk:reward:** must be ≥ `runtime.risk.min_rr` (default 2.0, i.e. 1:2)
 
 If R:R fails, downgrade to WAIT.
 
