@@ -4,5 +4,26 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "vix_max": 30,
+  "min_confluence": 4,
+  "min_rr": 2.0,
+  "max_signals_per_run": 3,
+
+  "atr_stop_multiplier": 1.5,
+  "atr_target_multiplier": 3.0,
+
+  "earnings_blackout_days": 3,
+
+  "signal_window_start_gmt": "02:30",
+  "signal_window_end_gmt": "08:30",
+
+  "rsi_buy_min": 40,
+  "rsi_buy_max": 65,
+
+  "news_sentiment_min": 0.15,
+
+  "volume_avg_period": 20,
+  "volume_min_ratio": 1.0
 }
