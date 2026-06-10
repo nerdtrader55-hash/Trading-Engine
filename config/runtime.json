@@ -3,6 +3,30 @@
   "description": "Runtime knobs. Edit freely; the routine reads these on every run.",
 
   "timezone": "Europe/London",
+  "slack_channel_id": "C0B2CTBAV9B",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "signal_window_start_gmt": "02:30",
+  "signal_window_end_gmt": "08:30",
+
+  "vix_max": 30,
+  "min_rr": 2.0,
+  "max_signals_per_run": 3,
+  "min_categories_for_buy": 4,
+
+  "confidence": {
+    "high_threshold": 5,
+    "medium_threshold": 4
+  },
+
+  "risk": {
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_account_risk_pct": 2.0
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_elevated_bar": 5
+  }
 }

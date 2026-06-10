@@ -104,13 +104,17 @@ If R:R fails, downgrade to WAIT.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags).
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+Select the template based on outcome:
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+- **Kill-switch fired** → Template B
+- **≥1 BUY signal issued** → Template A
+- **No kill-switch but no signals** → Template C
 
-Never change the template file. 
+Always include the macro snapshot header (VIX, SPY, QQQ, DXY), the signal block or no-signal note, the excluded-tickers footer, and the risk disclaimer. Do not post any other messages during the run. Never change the template file.
+
+Do not update anything into stock files or this repo during the run. This is an output-only engine.
 
 
 ## 8. Hard rules — never violate
