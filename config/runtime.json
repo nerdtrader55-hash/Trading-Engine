@@ -4,5 +4,52 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "min_categories_counter_trend": 5,
+    "max_signals_per_run": 3
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_account_risk_pct": 2.0
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "vix_caution_level": 20,
+    "skip_fomc_days": true,
+    "skip_cpi_days": true,
+    "skip_nfp_days": true
+  },
+
+  "earnings": {
+    "blackout_trading_days_before": 3,
+    "blackout_trading_days_after": 1,
+    "post_earnings_min_confluence": 5
+  },
+
+  "indicators": {
+    "ema_short": 20,
+    "ema_mid": 50,
+    "ema_long": 200,
+    "rsi_period": 14,
+    "rsi_buy_min": 40,
+    "rsi_buy_max": 65,
+    "macd_fast": 12,
+    "macd_slow": 26,
+    "macd_signal": 9,
+    "bbands_period": 20,
+    "bbands_stddev": 2,
+    "atr_period": 14,
+    "stoch_k": 14,
+    "stoch_d": 3,
+    "stoch_smooth": 3,
+    "volume_confirm_multiplier": 1.0,
+    "volume_strong_confirm_multiplier": 1.5
+  }
 }
