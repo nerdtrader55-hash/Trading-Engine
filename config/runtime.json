@@ -4,5 +4,32 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window": {
+    "description": "UTC window during which signals may be generated. Outside this window the routine must post a WAIT message and exit.",
+    "start_utc": "02:30",
+    "end_utc": "08:30"
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "description": "If VIX closes above vix_max, or today is an FOMC / CPI / NFP day, skip all signals and post the kill-switch Slack message."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "max_signals_per_run": 3,
+    "description": "5-6 confirms = HIGH confidence. 4 confirms = MEDIUM confidence (note smaller size). ≤3 = WAIT."
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "max_risk_per_trade_pct": 2.0,
+    "description": "Stop = entry - (stop_atr_multiplier × ATR14). Target = entry + (target_atr_multiplier × ATR14). Trade only when risk:reward ≥ min_rr."
+  },
+
+  "earnings_blackout_days": 3
 }

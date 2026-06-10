@@ -72,7 +72,7 @@ The repo can be private — Claude Code routines just need read access.
    - **Name:** `trading signals`
    - **Repository:** `your-username/claude-trading-signals`
    - **Connectors:** check **Alpha Vantage** and **Slack**
-   - **Trigger:** **Schedule** → **Weekdays** → **02:00** in your timezone
+   - **Trigger:** **Schedule** → **Weekdays** → **06:00 AM GMT** (pre-market; US market opens 14:30 GMT)
    - **Prompt:** paste the fenced block from [`ROUTINE_PROMPT.md`](./ROUTINE_PROMPT.md)
 4. Click **Create**
 

@@ -12,10 +12,20 @@ This is the file the routine runs. Follow it in order. Each step has a clear sto
 Always start by reading:
 
 - `config/stocks.json` — the universe
-- `config/runtime.json` — risk caps, thresholds, Slack channel, timezone
+- `config/runtime.json` — risk caps, thresholds, Slack channel, timezone, signal window
 - `templates/slack-output.md` — output format
 
 Do not proceed until all three load successfully.
+
+## 0.5. Signal window check (pre-market only)
+
+Signals are generated **only** during the window defined by `runtime.signal_window` (default `02:30–08:30 UTC`). This window covers the pre-market period before the US market opens at 14:30 GMT.
+
+Check the current UTC time:
+- If **inside** the window → continue to step 1.
+- If **outside** the window → post Template C from `templates/slack-output.md` and **stop**. Do not analyse any tickers.
+
+Target delivery: **06:00 AM GMT** daily (weekdays). The routine should be scheduled to fire at or before this time.
 
 ## 1. Macro kill-switches (check first, fail fast)
 
@@ -23,7 +33,7 @@ Pull these via Alpha Vantage MCP or `web_search`:
 
 | Check | Condition to stop | Source |
 |---|---|---|
-| VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX level | `> runtime.macro_kill_switches.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
@@ -86,19 +96,22 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 | Macro | SPY & QQQ futures green AND VIX < 20 |
 | Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
 
-**Decision rule:**
+**Decision rule** (thresholds from `confluence` block in `config/runtime.json`):
 
 - 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
+- 4 confirms → MEDIUM confidence BUY (add "smaller size" note to Slack)
 - ≤3 confirms → WAIT (no signal output)
+
+Cap total BUY signals at `confluence.max_signals_per_run` (default 3). If more tickers qualify, keep only the highest-confluence ones; use module 10 statistical patterns to break ties.
 
 ## 6. Risk gate (must pass to issue BUY)
 
-Compute:
+Compute using values from `config/runtime.json`:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
-- **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
+- **Stop:** entry − (`risk.stop_atr_multiplier` × ATR14) — default 1.5 × ATR14
+- **Target:** entry + (`risk.target_atr_multiplier` × ATR14) — default 3.0 × ATR14
+- **Risk:reward:** must be ≥ `risk.min_rr` (default 2.0, i.e. 1:2)
+- **Max risk per trade:** `risk.max_risk_per_trade_pct` (default 2%) — note in signal if sizing guidance is needed
 
 If R:R fails, downgrade to WAIT.
 
