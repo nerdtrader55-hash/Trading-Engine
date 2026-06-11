@@ -3,6 +3,34 @@
   "description": "Runtime knobs. Edit freely; the routine reads these on every run.",
 
   "timezone": "Europe/London",
+  "slack_channel_id": "C0B2CTBAV9B",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "signal_window": {
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "note": "Signals are only generated and posted during this GMT window."
+  },
+
+  "confluence": {
+    "min_categories_for_buy": 4,
+    "note": "4/6 = MEDIUM confidence BUY; 5-6/6 = HIGH confidence BUY; <=3/6 = WAIT"
+  },
+
+  "risk": {
+    "min_rr": 2.0,
+    "stop_loss_atr_multiplier": 1.5,
+    "target_atr_multiplier": 3.0,
+    "note": "Stop = entry - (stop_loss_atr_multiplier x ATR14). Target = entry + (target_atr_multiplier x ATR14). R:R must be >= min_rr or signal is downgraded to WAIT."
+  },
+
+  "macro_kill_switches": {
+    "vix_max": 30,
+    "note": "If VIX > vix_max, post kill-switch message and stop. No signals on FOMC, CPI, or NFP days."
+  },
+
+  "output": {
+    "max_signals_per_run": 3,
+    "earnings_blackout_days": 3,
+    "note": "Never more than max_signals_per_run concurrent BUY signals. Exclude tickers within earnings_blackout_days trading days of earnings."
+  }
 }
