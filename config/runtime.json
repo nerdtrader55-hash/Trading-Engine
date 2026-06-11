@@ -4,5 +4,22 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "vix_max": 30,
+  "vix_caution": 25,
+
+  "min_rr": 2.0,
+
+  "atr_stop_multiplier": 1.5,
+  "atr_target_multiplier": 3.0,
+
+  "max_concurrent_signals": 3,
+  "min_confluence_categories": 4,
+
+  "signal_window_start_gmt": "02:30",
+  "signal_window_end_gmt": "08:30",
+  "target_delivery_gmt": "06:00",
+
+  "earnings_blackout_days": 3
 }

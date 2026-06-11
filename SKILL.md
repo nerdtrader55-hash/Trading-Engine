@@ -17,6 +17,14 @@ Always start by reading:
 
 Do not proceed until all three load successfully.
 
+## 0.1. Signal window check
+
+Check the current time in GMT.
+
+- Valid window: `runtime.signal_window_start_gmt` (02:30) to `runtime.signal_window_end_gmt` (08:30)
+- Target delivery: `runtime.target_delivery_gmt` (06:00)
+- If the routine fires outside this window, post a note to Slack and stop. Do not analyse tickers outside this window.
+
 ## 1. Macro kill-switches (check first, fail fast)
 
 Pull these via Alpha Vantage MCP or `web_search`:
@@ -24,15 +32,18 @@ Pull these via Alpha Vantage MCP or `web_search`:
 | Check | Condition to stop | Source |
 |---|---|---|
 | VIX level | `> runtime.vix_max` (default 30) | Alpha Vantage `GLOBAL_QUOTE` symbol `^VIX` |
+| VIX caution | `> runtime.vix_caution` (default 25) | same — raise confluence bar to 5/6 for all tickers |
 | FOMC day | Today is on the Fed calendar | `web_search`: "FOMC meeting today" |
 | CPI release | Today is CPI release day | `web_search`: "US CPI release date this week" |
 | NFP release | Today is jobs day | `web_search`: "US non-farm payrolls release date this week" |
 
-If **any** fire: post the kill-switch Slack message from `templates/slack-output.md`, then **stop**. Do not analyze tickers.
+If VIX > 30 **or** FOMC/CPI/NFP day: post the kill-switch Slack message from `templates/slack-output.md` (Template B), then **stop**. Do not analyse tickers.
+
+If VIX is 25–30: continue analysis but raise the minimum confluence bar to 5/6 for every ticker.
 
 ## 2. Earnings blackout (per-ticker)
 
-For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within **3 trading days** in either direction of today, exclude it from analysis and note it in the Slack footer.
+For each ticker, call Alpha Vantage `EARNINGS_CALENDAR` (3-month horizon). If the ticker has earnings within **`runtime.earnings_blackout_days`** (default 3) trading days in either direction of today, exclude it from analysis and note it in the Slack footer.
 
 ## 3. Data pull per surviving ticker
 
@@ -62,16 +73,16 @@ If any required call returns null/error for a ticker, skip that ticker and add i
 
 Read each file under `framework/` and apply it. Each module outputs a directional read for the ticker:
 
-- `01-trend-analysis.md`
-- `02-momentum.md`
-- `03-price-action.md`
-- `04-volume.md`
-- `05-volatility.md`
-- `06-macro.md`
-- `07-sentiment.md`
-- `08-earnings-events.md` (already partially applied in step 2)
-- `09-multi-timeframe.md`
-- `10-statistical-patterns.md`
+- `01-trend-analysis.md` — EMA 20/50/200 stack, HH/HL structure, SPY/QQQ alignment
+- `02-momentum.md` — RSI(14), MACD(12,26,9), Stochastic, divergences
+- `03-price-action.md` — Support/resistance, candle patterns, Fibonacci, VWAP, gaps, breakouts
+- `04-volume.md` — Volume vs 20-day average, breakout confirmation, dark pool prints
+- `05-volatility.md` — Bollinger Band squeeze, ATR(14), VIX context
+- `06-macro.md` — SPY/QQQ futures, VIX, DXY, 10Y yield, economic calendar
+- `07-sentiment.md` — News sentiment score, analyst upgrades/downgrades, options flow, put/call ratio
+- `08-earnings-events.md` — 3-day blackout (already applied in step 2; re-confirm here)
+- `09-multi-timeframe.md` — Weekly trend confirmation, hourly entry refinement
+- `10-statistical-patterns.md` — Historical pattern matching, correlation, anomaly detection, sector rotation
 
 ## 5. Confluence score
 
@@ -79,39 +90,48 @@ Roll the 10 modules into 6 confluence categories (this is the gate):
 
 | Category | BUY confirms when |
 |---|---|
-| Trend | Price > EMA20 > EMA50 > EMA200 (bull stack) |
-| Momentum | RSI 40–65 AND MACD bullish cross or above signal |
-| Volume | Today's volume > 20-day avg AND rising on up-days |
-| Price action | Recent support hold OR clean breakout with retest |
-| Macro | SPY & QQQ futures green AND VIX < 20 |
-| Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines |
+| Trend | Price > EMA20 > EMA50 > EMA200 (bull stack); higher highs / higher lows |
+| Momentum | RSI 40–65 AND MACD bullish cross or above signal line (no bearish divergence) |
+| Volume | Today's volume > 20-day avg AND rising on up-days (not a low-volume fakeout) |
+| Price Action | Recent support hold OR clean breakout with retest; Fibonacci / VWAP aligned |
+| Macro | SPY & QQQ futures green AND VIX < 20 AND DXY not spiking against tech |
+| Sentiment | Alpha Vantage news sentiment ≥ 0.15 AND no major negative headlines AND options flow net positive |
 
 **Decision rule:**
 
 - 5–6 confirms → HIGH confidence BUY
-- 4 confirms → MEDIUM confidence BUY (smaller size note)
-- ≤3 confirms → WAIT (no signal output)
+- 4 confirms → MEDIUM confidence BUY (smaller size note in Slack footer)
+- ≤3 confirms → WAIT (no signal output; post Template C)
+
+**Adjustments that raise the bar to 5/6:**
+
+- VIX is in the 25–30 caution zone (from step 1)
+- Weekly trend (module 09) disagrees with the daily signal (counter-trend)
+- First trading day after an earnings blackout lifts
 
 ## 6. Risk gate (must pass to issue BUY)
 
 Compute:
 
-- **Stop:** entry − (1.5 × ATR14)
-- **Target:** entry + (3.0 × ATR14)
+- **Stop:** entry − (`runtime.atr_stop_multiplier` × ATR14) = entry − (1.5 × ATR14)
+- **Target:** entry + (`runtime.atr_target_multiplier` × ATR14) = entry + (3.0 × ATR14)
 - **Risk:reward:** must be ≥ `runtime.min_rr` (default 1:2)
 
-If R:R fails, downgrade to WAIT.
+If R:R fails, downgrade to WAIT. The 1:2 minimum is non-negotiable.
 
 ## 7. Post to Slack
 
-Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`. Use markdown that Slack will render correctly (no HTML tags). Always include:
+Use the Slack connector. Channel = `runtime.slack_channel_id`. Format = `templates/slack-output.md`.
 
-DO not update anything into stock files or this repo during the run. This is an output-only engine.
+- **BUY signals exist:** use Template A — one line per signal: `{TICKER} : BUY`
+- **No qualifying signals:** use Template C — `WAIT` message
+- **Kill-switch fired:** use Template B — already posted in step 1
 
-Just post exactly same template-based message to Slack, with the BUY signals and the "also watching" list. Do not post any other messages during the run.
+Use plain text. Copy the `━━━` separator exactly from the template. Do not add price levels, stops, targets, confidence labels, or any text not in the template.
 
-Never change the template file. 
+Cap output at `runtime.max_concurrent_signals` (default 3) BUY signals. Highest confluence score wins ties.
 
+**Do not update any files in this repo during the run. This is an output-only engine.**
 
 ## 8. Hard rules — never violate
 
@@ -119,14 +139,16 @@ These come from section 9 of the original spec:
 
 - Never issue a signal within 3 trading days of earnings
 - Never claim guaranteed profits — include the risk note in the Slack message
-- Never issue more than 3 concurrent signals
-- Never skip macro checks
-- Never issue a signal on fewer than 4 confirming categories
+- Never issue more than 3 concurrent signals per run
+- Never skip macro checks (VIX, FOMC, CPI, NFP)
+- Never issue a signal on fewer than 4 confirming categories (5 when VIX 25–30 or counter-trend)
 - Never issue a signal with R:R below 1:2
+- Never signal if a stock is in a confirmed downtrend (price below all 3 EMAs) — only BUY setups fire
 - Never execute trades — this is a signal engine, output only
 - Never commit anything to this repo during a run
-- Never post signals to Slack other than slackoutput template
+- Never post signals to Slack other than via the template
+- Never fabricate prices, indicator values, or levels — if data is unavailable, skip the ticker
 
 ## 9. End the run
 
-Post the Slack message. Done. Do not loop. Do not start another analysis pass. Exit cleanly.
+Post the single Slack message. Done. Do not loop. Do not start another analysis pass. Exit cleanly.
