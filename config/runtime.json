@@ -4,5 +4,36 @@
 
   "timezone": "Europe/London",
 
-  "slack_channel_id": "C0B2CTBAV9B"
+  "slack_channel_id": "C0B2CTBAV9B",
+
+  "signal_window": {
+    "description": "Pre-market window during which signals may be issued (GMT). Routine fires at 06:00 GMT; window closes at 08:30 GMT.",
+    "start_gmt": "02:30",
+    "end_gmt": "08:30",
+    "target_delivery_gmt": "06:00"
+  },
+
+  "risk": {
+    "description": "Non-negotiable risk caps applied to every signal.",
+    "vix_max": 30,
+    "min_rr": 2.0,
+    "max_concurrent_positions": 3,
+    "max_risk_per_trade_pct": 2.0
+  },
+
+  "confluence": {
+    "description": "Scoring thresholds. HIGH fires at >=5, MEDIUM at 4, WAIT at <=3.",
+    "high_threshold": 5,
+    "medium_threshold": 4,
+    "atr_stop_multiplier": 1.5,
+    "atr_target_multiplier": 3.0
+  },
+
+  "macro_kill_switches": {
+    "description": "Any of these fires → post kill-switch message and stop. No ticker analysis.",
+    "vix_above": 30,
+    "skip_on_fomc_day": true,
+    "skip_on_cpi_day": true,
+    "skip_on_nfp_day": true
+  }
 }
